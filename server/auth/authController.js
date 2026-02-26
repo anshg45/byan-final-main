@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "./userModel.js";
+import { triggerN8nWebhook } from "../services/n8nService.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "byan_secret_key_123";
 const SKIP_DB = process.env.SKIP_DB === "true";
@@ -44,6 +45,18 @@ export const signup = async (req, res) => {
       role,
       companyName,
       companyDescription,
+      cin,
+      gst,
+      pan
+    });
+
+    // Trigger n8n webhook
+    triggerN8nWebhook("signup", {
+      userId: user._id,
+      name,
+      email: normalizedEmail,
+      role,
+      companyName,
       cin,
       gst,
       pan

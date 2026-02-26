@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import { extractKeywords } from "./atsKeywords.js";
 import { calculateScore } from "./atsScore.js";
 import { generateSuggestions } from "./atsSuggestions.js";
+import { triggerN8nWebhook } from "../services/n8nService.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const client = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;

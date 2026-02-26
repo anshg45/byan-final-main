@@ -6,7 +6,9 @@ dotenv.config();
 
 import authRoutes from "./auth/authRoutes.js";
 import oauthRoutes from "./oauth/oauthRoutes.js";
+import n8nRoutes from "./services/n8nRoutes.js";
 import OpenAI from "openai";
+
 import { analyzeATS } from "./ats/atsEngine.js";
 import { upload } from "./upload/uploadHandler.js";
 import { PDFParse } from "pdf-parse";
@@ -27,6 +29,7 @@ app.use(express.json());
 // -------------------- ROUTES ------------------------
 app.use("/auth", authRoutes);
 app.use("/oauth", oauthRoutes);
+app.use("/n8n", n8nRoutes);
 
 // -------------------- AI ROUTES ---------------------
 

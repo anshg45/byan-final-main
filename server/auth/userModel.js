@@ -18,7 +18,11 @@ const userSchema = new mongoose.Schema(
     companyDescription: { type: String },
     cin: { type: String },
     gst: { type: String },
-    pan: { type: String }
+    pan: { type: String },
+    
+    // Automation / Trust Score
+    trustScore: { type: Number, default: 0 },
+    isVerified: { type: Boolean, default: false }
   },
   { timestamps: true }
 );
