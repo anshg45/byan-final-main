@@ -63,6 +63,28 @@ export default function OpportunitiesPage({ openDetail, savedJobs=[], onToggleSa
     return () => clearTimeout(t)
   }, [])
 
+  useEffect(() => {
+    // Listen for resume updates
+    const handleStorage = () => {
+      try {
+        const storedUser = localStorage.getItem("byan:user");
+        let text = "";
+        if (storedUser) {
+          const u = JSON.parse(storedUser);
+          if (u.resumeText) text = u.resumeText;
+        }
+        if (!text) text = localStorage.getItem("byan:resume:text") || "";
+        setResumeText(text);
+      } catch {}
+    };
+    
+    window.addEventListener('storage', handleStorage);
+    // Also check immediately in case we missed an event or navigated within app
+    handleStorage();
+
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   useEffect(()=> {
     try {
       const stored = JSON.parse(localStorage.getItem("byan:liveOps") || "[]")
