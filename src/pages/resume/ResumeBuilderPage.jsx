@@ -13,6 +13,7 @@ import { extractResumeData } from "../../utils/resumeDataExtractor";
 import { mapToResumeFormData } from "../../utils/dataMapper";
 import { generateDOCX } from "./generators/docxGenerator";
 import { getDefaultResumeDataForTemplate } from "./templateDefaults.ts";
+import { updateProfile } from "../../api/auth";
 
 // Updated to match package.json version for compatibility
 const PDFJS_VERSION = '5.4.624';
@@ -96,6 +97,21 @@ export default function ResumeBuilderPage() {
       setRawText(extractedText);
       try {
         localStorage.setItem("byan:resume:text", extractedText);
+        // Sync with user profile if logged in
+        const userStr = localStorage.getItem("byan:user");
+        if (userStr) {
+          const u = JSON.parse(userStr);
+          if (u.id) {
+            updateProfile({ userId: u.id, resumeText: extractedText })
+              .then(res => {
+                if (res.user) {
+                  localStorage.setItem("byan:user", JSON.stringify(res.user));
+                  toast.success("Resume synced to profile!");
+                }
+              })
+              .catch(err => console.error("Profile sync failed", err));
+          }
+        }
       } catch {}
       const partialData = extractResumeData(extractedText);
       const mappedData = mapToResumeFormData(partialData);

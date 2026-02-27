@@ -237,8 +237,18 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT ? Number(process.env.PORT) : 5000;
 
 if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
-  app.listen(PORT, () => {
+  // Check if we are running in a container or local dev
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`⚠️ Port ${PORT} is busy, trying ${PORT + 1}...`);
+      app.listen(PORT + 1, '0.0.0.0', () => {
+        console.log(`🚀 Server running on http://localhost:${PORT + 1}`);
+      });
+    } else {
+      console.error(err);
+    }
   });
 }
 

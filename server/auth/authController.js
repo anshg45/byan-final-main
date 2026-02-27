@@ -106,16 +106,16 @@ export const login = async (req, res) => {
         }
       });
     }
-    const user = await User.findOne({ email: email.trim().toLowerCase() });
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(400).json({ error: "Invalid credentials" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
-      return res.status(400).json({ error: "Invalid password" });
+      return res.status(400).json({ error: "Invalid credentials" });
     }
 
     const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
@@ -128,12 +128,52 @@ export const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        companyName: user.companyName
+        companyName: user.companyName,
+        pan: user.pan,
+        trustScore: user.trustScore,
+        isVerified: user.isVerified,
+        resumeText: user.resumeText,
+        resumeKeywords: user.resumeKeywords
       }
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Login Error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { userId, resumeText, resumeKeywords } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    const updateData = {};
+    if (resumeText) updateData.resumeText = resumeText;
+    if (resumeKeywords) updateData.resumeKeywords = resumeKeywords;
+
+    const user = await User.findByIdAndUpdate(userId, { $set: updateData }, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      message: "Profile updated successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        resumeText: user.resumeText,
+        resumeKeywords: user.resumeKeywords
+      }
+    });
+  } catch (err) {
+    console.error("Update Profile Error:", err);
     res.status(500).json({ error: "Server error" });
   }
 };

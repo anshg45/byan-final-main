@@ -49,3 +49,12 @@ export async function uploadVerificationDoc(type, file, email) {
   });
   return res.json();
 }
+
+export async function updateProfile(data) {
+  const res = await fetch(`${API}/profile`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}

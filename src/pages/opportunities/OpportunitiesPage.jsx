@@ -13,7 +13,15 @@ export default function OpportunitiesPage({ openDetail, savedJobs=[], onToggleSa
   const [loading, setLoading] = useState(false)
   const [liveOps, setLiveOps] = useState([])
   const [resumeText, setResumeText] = useState(() => {
-    try { return localStorage.getItem("byan:resume:text") || "" } catch { return "" }
+    try { 
+      // Prioritize logged-in user's stored resume
+      const storedUser = localStorage.getItem("byan:user");
+      if (storedUser) {
+        const u = JSON.parse(storedUser);
+        if (u.resumeText) return u.resumeText;
+      }
+      return localStorage.getItem("byan:resume:text") || "" 
+    } catch { return "" }
   })
 
   const combined = useMemo(() => {

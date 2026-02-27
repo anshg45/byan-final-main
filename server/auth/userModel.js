@@ -22,7 +22,11 @@ const userSchema = new mongoose.Schema(
     
     // Automation / Trust Score
     trustScore: { type: Number, default: 0 },
-    isVerified: { type: Boolean, default: false }
+    isVerified: { type: Boolean, default: false },
+
+    // Resume Data for ATS
+    resumeText: { type: String, default: "" },
+    resumeKeywords: [{ type: String }]
   },
   { timestamps: true }
 );
