@@ -29,7 +29,14 @@ const OpportunityDetailModal = ({ isOpen, onClose, op, onSave, isSaved }) => {
   });
 
   const resumeText = (() => {
-    try { return localStorage.getItem("byan:resume:text") || "" } catch { return "" }
+    try { 
+      const storedUser = localStorage.getItem("byan:user");
+      if (storedUser) {
+        const u = JSON.parse(storedUser);
+        if (u.resumeText) return u.resumeText;
+      }
+      return localStorage.getItem("byan:resume:text") || "" 
+    } catch { return "" }
   })();
   const jdText = [op?.title, op?.about, op?.skills].filter(Boolean).join(". ");
   const ats = resumeText ? analyzeATSLocal(resumeText, jdText) : null;
@@ -220,6 +227,57 @@ const OpportunityDetailModal = ({ isOpen, onClose, op, onSave, isSaved }) => {
                       </div>
                     )}
                   </div>
+                </section>
+
+                <section className="mb-8">
+                  <h3 className="text-lg font-bold text-white mb-3">ATS Resume Analysis</h3>
+                  {ats ? (
+                    <div className="bg-gray-800/50 p-4 rounded-2xl border border-gray-700 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-gray-400">Match Score</span>
+                        <span className={`text-xl font-bold ${
+                          matchScore >= 75 ? 'text-emerald-400' : matchScore >= 50 ? 'text-amber-400' : 'text-red-400'
+                        }`}>{Math.round(matchScore)}%</span>
+                      </div>
+                      
+                      <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ${matchScore >= 75 ? 'bg-emerald-500' : matchScore >= 50 ? 'bg-amber-500' : 'bg-red-500'}`} 
+                          style={{ width: `${matchScore}%` }}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold text-gray-500 uppercase">Matched Skills</p>
+                        <div className="flex flex-wrap gap-2">
+                          {ats.matched.length > 0 ? ats.matched.map(kw => (
+                            <span key={kw} className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs border border-emerald-500/20">
+                              {kw}
+                            </span>
+                          )) : <span className="text-gray-500 text-xs italic">No specific keywords matched.</span>}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold text-gray-500 uppercase">Missing Keywords</p>
+                        <div className="flex flex-wrap gap-2">
+                          {ats.missing.length > 0 ? ats.missing.map(kw => (
+                            <span key={kw} className="px-2 py-1 rounded-md bg-red-500/10 text-red-400 text-xs border border-red-500/20">
+                              {kw}
+                            </span>
+                          )) : <span className="text-gray-500 text-xs italic">Great job! You have all key skills.</span>}
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-gray-700">
+                        <p className="text-sm text-gray-300 italic">"{ats.suggestions}"</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-gray-800/30 rounded-xl border border-gray-700 text-center">
+                      <p className="text-gray-400 text-sm mb-2">Upload your resume to see a detailed ATS analysis for this role.</p>
+                    </div>
+                  )}
                 </section>
                 
                 {applyOpen && (

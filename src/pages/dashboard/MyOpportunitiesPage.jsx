@@ -1,13 +1,35 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronLeft, Bookmark, Briefcase, Clock, ShieldCheck, Star, ArrowUpRight, Sparkles } from 'lucide-react'
 import OpportunityCard from '../../shared/OpportunityCard'
 import { opportunitiesList } from '../../data/opportunities'
+import { analyzeATSLocal } from '../../utils/atsEngine'
 
 export default function MyOpportunitiesPage({ openPage, savedJobs = [], onToggleSave = () => {} }) {
   // We now strictly use the savedJobs passed from the parent state.
   // No more hardcoded 'defaultIds' that override the user's actual empty state.
-  const savedList = opportunitiesList.filter(op => savedJobs.includes(op.id))
+  
+  const resumeText = (() => {
+    try { 
+      const storedUser = localStorage.getItem("byan:user");
+      if (storedUser) {
+        const u = JSON.parse(storedUser);
+        if (u.resumeText) return u.resumeText;
+      }
+      return localStorage.getItem("byan:resume:text") || "" 
+    } catch { return "" }
+  })();
+
+  const savedList = useMemo(() => {
+    return opportunitiesList
+      .filter(op => savedJobs.includes(op.id))
+      .map(op => {
+        if (!resumeText) return op;
+        const jdText = [op.title, op.about, op.skills].filter(Boolean).join(". ");
+        const res = analyzeATSLocal(resumeText, jdText);
+        return { ...op, compat: res ? res.score : null };
+      });
+  }, [savedJobs, resumeText]);
   
   const activeApplications = [
     { id: 'int-001', title: 'Product Management Intern', company: 'State Digital Office', status: 'Interviewing', date: 'Feb 20', trust: 96 },
@@ -74,6 +96,7 @@ export default function MyOpportunitiesPage({ openPage, savedJobs = [], onToggle
                     saved={true} 
                     onSave={() => onToggleSave(op)}
                     trustScore={op.trust}
+                    matchScore={op.compat}
                   />
                 ))}
               </div>
