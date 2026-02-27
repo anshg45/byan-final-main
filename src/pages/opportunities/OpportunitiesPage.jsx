@@ -47,10 +47,20 @@ export default function OpportunitiesPage({ openDetail, savedJobs=[], onToggleSa
   }, [liveOps])
 
   const withCompat = useMemo(() => {
-    if (!resumeText) return combined;
+    // If no resume, generate dummy scores for demo as requested
     return combined.map(op => {
       const jdText = [op.title, op.about, op.skills].filter(Boolean).join(". ");
-      const res = analyzeATSLocal(resumeText, jdText);
+      let res;
+      
+      if (resumeText) {
+        res = analyzeATSLocal(resumeText, jdText);
+      } else {
+        // Deterministic dummy score (50-95%) based on job ID/Title so it stays consistent
+        const seed = op.id.split('').reduce((a,c) => a + c.charCodeAt(0), 0) + op.title.length;
+        const dummyScore = 50 + (seed % 46); 
+        res = { score: dummyScore };
+      }
+      
       return { ...op, compat: res ? res.score : null };
     });
   }, [combined, resumeText]);

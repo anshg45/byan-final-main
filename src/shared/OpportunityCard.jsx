@@ -59,18 +59,13 @@ export default function OpportunityCard({ op, onView=()=>{}, onSave=()=>{}, save
             {trustScore}% Trust
           </div>
           <div className="text-xs text-gray-400">{isScam ? 'High Risk' : isUnverified ? 'Unverified' : 'Verified'}</div>
-          {typeof matchScore === 'number' ? (
+          {typeof matchScore === 'number' && (
             <div className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
               matchScore >= 75 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
               matchScore >= 50 ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' :
               'bg-red-500/10 border-red-500/30 text-red-400'
             }`}>
               {Math.round(matchScore)}% Match
-            </div>
-          ) : (
-            <div className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold border bg-gray-800 border-gray-700 text-gray-500 flex items-center gap-1">
-              <span>ATS</span>
-              <span className="text-[8px] opacity-60">(N/A)</span>
             </div>
           )}
         </div>
