@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Loader2, Building2, User as UserIcon, ChevronLeft, Mail, Lock, ArrowRight, Github, Sparkles, FileText, CheckCircle2, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { signup, login, requestOtp, verifyOtp, uploadVerificationDoc } from "../../api/auth";
+import Logo from "../../shared/Logo";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 
@@ -163,9 +164,9 @@ export default function AuthPage({ openPage, initialMode = 'login' }) {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", damping: 12 }}
-                className="w-20 h-20 bg-red-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-red-500/20"
+                className="mx-auto mb-6 flex justify-center"
               >
-                <Shield className="text-red-500" size={40} />
+                <Logo className="w-20 h-20" size={40} />
               </motion.div>
               <h1 className="text-4xl font-bold text-white mb-3">Join the Network</h1>
               <p className="text-gray-400">Select your account type to get started with BYAN.</p>

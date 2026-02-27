@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Shield, Menu, X, LogOut, User, PlusCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
+import Logo from './Logo'
 
 export default function Nav({ currentPage, setCurrentPage, setAuthMode, savedCount = 0, onOpenSaved = ()=>{} }){
   const [open, setOpen] = React.useState(false)
@@ -59,14 +60,7 @@ export default function Nav({ currentPage, setCurrentPage, setAuthMode, savedCou
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
         <div onClick={() => { setCurrentPage('home'); setOpen(false) }} className="flex items-center gap-3 cursor-pointer group">
-          <div className="w-10 h-10 rounded-xl overflow-hidden border border-red-500/20 bg-black/40">
-            <img 
-              src="/byan-logo.png?v=1" 
-              alt="BYAN" 
-              className="w-full h-full object-cover"
-              onError={(e)=>{ e.currentTarget.onerror=null; e.currentTarget.src='/byan-logo.svg?v=2'; }}
-            />
-          </div>
+          <Logo className="w-10 h-10" size={24} />
           <div className="font-bold text-xl tracking-tight text-white">BYAN</div>
         </div>
 
