@@ -1,15 +1,34 @@
 // src/pages/home/HomePage.jsx
-import React from 'react'
+import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import OpportunityCard from '../../shared/OpportunityCard'
 import { Bot } from 'lucide-react'
-
-const sample = [
-  { id:'int-001', title:'Product Management Intern', company:'State Digital Office', location:'Bengaluru', stipend:15000, type:'Internship', about:'Work on youth outreach.' },
-  { id:'int-002', title:'Frontend Intern', company:'CampusTech', location:'Remote', stipend:10000, type:'Internship', about:'Build UI components.' }
-]
+import { opportunitiesList } from '../../data/opportunities'
+import { analyzeATSLocal } from '../../utils/atsEngine'
 
 export default function HomePage({ openPage }){
+  const resumeText = (() => {
+    try { 
+      const storedUser = localStorage.getItem("byan:user");
+      if (storedUser) {
+        const u = JSON.parse(storedUser);
+        if (u.resumeText) return u.resumeText;
+      }
+      return localStorage.getItem("byan:resume:text") || "" 
+    } catch { return "" }
+  })();
+
+  const featuredOps = useMemo(() => {
+    // Pick 2 high trust opportunities as featured
+    const selected = opportunitiesList.filter(op => ['int-001', 'int-002'].includes(op.id));
+    return selected.map(op => {
+      if (!resumeText) return op;
+      const jdText = [op.title, op.about, op.skills].filter(Boolean).join(". ");
+      const res = analyzeATSLocal(resumeText, jdText);
+      return { ...op, compat: res ? res.score : null };
+    });
+  }, [resumeText]);
+
   return (
     <main className="min-h-screen">
       <motion.section
@@ -244,13 +263,15 @@ export default function HomePage({ openPage }){
           <div className="hidden lg:block">
             <h3 className="text-lg font-semibold mb-3">Featured opportunities</h3>
             <div className="grid gap-4">
-              {sample.map(op => (
+              {featuredOps.map(op => (
                 <OpportunityCard
                   key={op.id}
                   op={op}
                   onView={() => openPage('opportunities')}
                   onSave={() => {}}
                   saved={false}
+                  trustScore={op.trust}
+                  matchScore={op.compat}
                 />
               ))}
             </div>

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Briefcase, Bookmark, Zap, CheckCircle2, Clock, ArrowUpRight, Star } from 'lucide-react'
 import { opportunitiesList } from '../../data/opportunities'
+import { analyzeATSLocal } from '../../utils/atsEngine'
 
 export default function DashboardPage({ openPage, savedJobs = [] }) {
   const [userName, setUserName] = useState("User");
@@ -18,10 +19,29 @@ export default function DashboardPage({ openPage, savedJobs = [] }) {
     }
   }, []);
 
-  const recommendations = opportunitiesList
-    .filter(op => op.trust > 90 && !savedJobs.includes(op.id))
-    .slice(0, 3);
+  const resumeText = (() => {
+    try { 
+      const storedUser = localStorage.getItem("byan:user");
+      if (storedUser) {
+        const u = JSON.parse(storedUser);
+        if (u.resumeText) return u.resumeText;
+      }
+      return localStorage.getItem("byan:resume:text") || "" 
+    } catch { return "" }
+  })();
 
+  const recommendations = useMemo(() => {
+    return opportunitiesList
+      .filter(op => op.trust > 90 && !savedJobs.includes(op.id))
+      .slice(0, 3)
+      .map(op => {
+        if (!resumeText) return op;
+        const jdText = [op.title, op.about, op.skills].filter(Boolean).join(". ");
+        const res = analyzeATSLocal(resumeText, jdText);
+        return { ...op, compat: res ? res.score : null };
+      });
+  }, [savedJobs, resumeText]);
+  
   // Map saved jobs to activity for a more dynamic feel
   const activities = opportunitiesList
     .filter(op => savedJobs.includes(op.id))
@@ -140,7 +160,18 @@ export default function DashboardPage({ openPage, savedJobs = [] }) {
                 <motion.div key={job.id} whileHover={{ x: 4 }} onClick={() => openPage('opportunities')} className="p-4 bg-gray-900/50 border border-gray-800 rounded-2xl backdrop-blur-sm flex items-center justify-between group cursor-pointer hover-glow transition-all">
                   <div>
                     <div className="font-medium text-white group-hover:text-red-400 transition-colors">{job.title}</div>
-                    <div className="text-xs text-gray-500">{job.location} • {job.trust}% Trust</div>
+                    <div className="text-xs text-gray-500 flex items-center gap-2">
+                      <span>{job.location} • {job.trust}% Trust</span>
+                      {job.compat !== undefined && job.compat !== null && (
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                          job.compat >= 75 ? 'bg-emerald-500/10 text-emerald-400' : 
+                          job.compat >= 50 ? 'bg-amber-500/10 text-amber-400' : 
+                          'bg-red-500/10 text-red-400'
+                        }`}>
+                          {job.compat}% Match
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <ArrowUpRight size={18} className="text-gray-600 group-hover:text-white transition-colors" />
                 </motion.div>
